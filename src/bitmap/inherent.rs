@@ -15,8 +15,31 @@ impl RoaringBitmap {
     /// ```
     pub fn new() -> RoaringBitmap {
         RoaringBitmap {
-            containers: Vec::new()
+            containers: Vec::new(),
+            min: None,
+            max: None
         }
+    }
+
+    fn update_extremes(&mut self, value: u32) {
+        self.min = self.min.map_or(Some(value), |m| {
+            Some(
+                if value < m {
+                    value
+                } else {
+                    m
+                }
+            )   
+        });
+        self.max = self.max.map_or(Some(value), |M| {
+            Some(
+                if value < M {
+                    value
+                } else {
+                    M
+                }
+            )   
+        });
     }
 
     /// Adds a value to the set. Returns `true` if the value was not already present in the set.
@@ -40,7 +63,9 @@ impl RoaringBitmap {
                 &mut self.containers[loc]
             }
         };
-        container.insert(index)
+        let res = container.insert(index);
+        self.update_extremes(value);
+        res
     }
 
     /// Adds a value to the set.
@@ -75,7 +100,9 @@ impl RoaringBitmap {
         let last = self.containers.last_mut().unwrap();
         assert!(last.key <= key);
         assert!(last.len == 0 || last.max() <= index);
-        last.push(index)
+        let res = last.push(index);
+        self.update_extremes(value);
+        res
     }
 
     /// Removes a value from the set. Returns `true` if the value was present in the set.
@@ -93,7 +120,7 @@ impl RoaringBitmap {
     /// ```
     pub fn remove(&mut self, value: u32) -> bool {
         let (key, index) = util::split(value);
-        match self.containers.binary_search_by_key(&key, |c| c.key) {
+        let res = match self.containers.binary_search_by_key(&key, |c| c.key) {
             Ok(loc) => {
                 if self.containers[loc].remove(index) {
                     if self.containers[loc].len == 0 {
@@ -105,7 +132,10 @@ impl RoaringBitmap {
                 }
             }
             _ => false,
-        }
+        };
+        self.min = self.min();
+        self.max = self.max();
+        res
     }
     /// Removes a range of values from the set specific as [start..end).
     /// Returns the number of removed values.
@@ -164,6 +194,8 @@ impl RoaringBitmap {
             }
             index += 1;
         }
+        self.min = self.min();
+        self.max = self.max();
         result
     }
 
@@ -184,7 +216,7 @@ impl RoaringBitmap {
         if self.is_empty(){
             return false;
         }
-        if value > self.max().unwrap() || value < self.min().unwrap() {
+        if value > self.max.unwrap() || value < self.min.unwrap() {
             return false;
         }
         let (key, index) = util::split(value);
