@@ -17,7 +17,7 @@ impl RoaringBitmap {
         RoaringBitmap {
             containers: Vec::new(),
             max: 0,
-            min: 0
+            min: u32::max_value()
         }
     }
 
@@ -71,7 +71,7 @@ impl RoaringBitmap {
             self.max = value;
         }
         // probably optimizable away
-        if value > self.min {
+        if value < self.min {
             self.min = value;
         }
         let (key, index) = util::split(value);
