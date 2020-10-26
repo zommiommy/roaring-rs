@@ -16,6 +16,8 @@ impl RoaringBitmap {
     pub fn new() -> RoaringBitmap {
         RoaringBitmap {
             containers: Vec::new(),
+            max: 0,
+            min: 0
         }
     }
 
@@ -181,6 +183,9 @@ impl RoaringBitmap {
     /// assert_eq!(rb.contains(100), false);
     /// ```
     pub fn contains(&self, value: u32) -> bool {
+        if value > self.max || value < self.min {
+            return false;
+        }
         let (key, index) = util::split(value);
         match self.containers.binary_search_by_key(&key, |c| c.key) {
             Ok(loc) => self.containers[loc].contains(index),
