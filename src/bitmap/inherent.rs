@@ -66,7 +66,7 @@ impl RoaringBitmap {
     ///
     /// assert_eq!(rb.iter().collect::<Vec<u32>>(), vec![1, 3, 5]);
     /// ```
-    pub fn push(&mut self, value: u32) -> bool{
+    pub fn push(&mut self, value: u32) -> bool {
         if value > self.max {
             self.max = value;
         }
