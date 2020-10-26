@@ -170,9 +170,6 @@ impl RoaringBitmap {
             containers.push(Container { key, len, store });
         }
 
-        let mut result = RoaringBitmap { containers, min:0, max:0 };
-        result.min = result.min().unwrap();
-        result.max = result.max().unwrap();
-        Ok(result)
+        Ok(RoaringBitmap { containers})
     }
 }
