@@ -37,7 +37,7 @@ impl RoaringBitmap {
         if value > self.max {
             self.max = value;
         }
-        if value > self.min {
+        if value < self.min {
             self.min = value;
         }
         let (key, index) = util::split(value);
