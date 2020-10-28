@@ -93,7 +93,7 @@ impl RoaringBitmap {
     /// ```
     pub fn remove(&mut self, value: u32) -> bool {
         let (key, index) = util::split(value);
-        let res = match self.containers.binary_search_by_key(&key, |c| c.key) {
+        match self.containers.binary_search_by_key(&key, |c| c.key) {
             Ok(loc) => {
                 if self.containers[loc].remove(index) {
                     if self.containers[loc].len == 0 {
@@ -105,8 +105,7 @@ impl RoaringBitmap {
                 }
             }
             _ => false,
-        };
-        res
+        }
     }
     /// Removes a range of values from the set specific as [start..end).
     /// Returns the number of removed values.
