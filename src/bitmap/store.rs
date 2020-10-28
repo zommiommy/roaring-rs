@@ -133,9 +133,9 @@ impl Store {
     pub fn contains(&self, index: u16) -> bool {
         match *self {
             Array(ref vec) => {
-                if vec.is_empty() || index < vec[0] || index > *vec.last().unwrap() {
-                    return false;
-                }
+                //if vec.is_empty() || index < vec[0] || index > *vec.last().unwrap() {
+                //    return false;
+                //}
                 vec.binary_search(&index).is_ok()
             },
             Bitmap(ref bits) => bits[key(index)] & (1 << bit(index)) != 0,
