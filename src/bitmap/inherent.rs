@@ -16,30 +16,7 @@ impl RoaringBitmap {
     pub fn new() -> RoaringBitmap {
         RoaringBitmap {
             containers: Vec::new(),
-            min: None,
-            max: None
         }
-    }
-
-    fn update_extremes(&mut self, value: u32) {
-        self.min = self.min.map_or(Some(value), |m| {
-            Some(
-                if value < m {
-                    value
-                } else {
-                    m
-                }
-            )   
-        });
-        self.max = self.max.map_or(Some(value), |M| {
-            Some(
-                if value < M {
-                    value
-                } else {
-                    M
-                }
-            )   
-        });
     }
 
     /// Adds a value to the set. Returns `true` if the value was not already present in the set.
@@ -63,9 +40,7 @@ impl RoaringBitmap {
                 &mut self.containers[loc]
             }
         };
-        let res = container.insert(index);
-        self.update_extremes(value);
-        res
+        container.insert(index)
     }
 
     /// Adds a value to the set.
@@ -100,9 +75,7 @@ impl RoaringBitmap {
         let last = self.containers.last_mut().unwrap();
         assert!(last.key <= key);
         assert!(last.len == 0 || last.max() <= index);
-        let res = last.push(index);
-        self.update_extremes(value);
-        res
+        last.push(index)
     }
 
     /// Removes a value from the set. Returns `true` if the value was present in the set.
@@ -133,8 +106,6 @@ impl RoaringBitmap {
             }
             _ => false,
         };
-        self.min = self.min();
-        self.max = self.max();
         res
     }
     /// Removes a range of values from the set specific as [start..end).
@@ -194,8 +165,6 @@ impl RoaringBitmap {
             }
             index += 1;
         }
-        self.min = self.min();
-        self.max = self.max();
         result
     }
 
@@ -216,10 +185,10 @@ impl RoaringBitmap {
         if self.is_empty(){
             return false;
         }
-        if value > self.max.unwrap() || value < self.min.unwrap() {
+        let (key, index) = util::split(value);
+        if key < self.containers[0].key || key > self.containers.last().unwrap().key {
             return false;
         }
-        let (key, index) = util::split(value);
         match self.containers.binary_search_by_key(&key, |c| c.key) {
             Ok(loc) => self.containers[loc].contains(index),
             Err(_) => false,

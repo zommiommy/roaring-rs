@@ -170,6 +170,6 @@ impl RoaringBitmap {
             containers.push(Container { key, len, store });
         }
 
-        Ok(RoaringBitmap { containers, min:None, max:None})
+        Ok(RoaringBitmap { containers })
     }
 }
