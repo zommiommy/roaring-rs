@@ -181,11 +181,8 @@ impl RoaringBitmap {
     /// assert_eq!(rb.contains(100), false);
     /// ```
     pub fn contains(&self, value: u32) -> bool {
-        if self.is_empty(){
-            return false;
-        }
         let (key, index) = util::split(value);
-        if key < self.containers[0].key || key > self.containers.last().unwrap().key {
+        if self.is_empty() || key < self.containers[0].key || key > self.containers.last().unwrap().key {
             return false;
         }
         match self.containers.binary_search_by_key(&key, |c| c.key) {
